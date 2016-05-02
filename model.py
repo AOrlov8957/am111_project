@@ -148,10 +148,9 @@ class Baseline(object):
 		rankings.reverse()
 		return rankings
 
-
 data = util.design_dict('ml-100k/u.data')
 
 m = Baseline()
 m.fit(data)
-print m.getRecommendations(4,similarity=m.sim_pearson)
+print m.getRecommendations(8,similarity=m.sim_pearson)
 
