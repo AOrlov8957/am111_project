@@ -4,6 +4,7 @@ import numpy as np
 import sklearn
 from sklearn.cross_validation import train_test_split
 import scipy as sp
+from math import sqrt
 
 class Baseline(object):
 	'''
@@ -23,8 +24,8 @@ class Baseline(object):
 	# calculate summary statistics and fit baseline model
 	def fit(self, data):
 		self.X = data
-		print self.sim_pearson(1,4)
-		print self.sim_distance(1,4)
+		print self.sim_pearson(1,1)
+		print self.sim_distance(1,1)
 				
 		pass
 
@@ -48,9 +49,10 @@ class Baseline(object):
 		if len(si) == 0:
 			return 0
 
-		sum_of_squares = np.sum([pow(self.X[p1][item] - self.X[p2][item],2) for item in self.X[p1] if item in self.X[p2]])
+		sum_of_squares = np.sum([pow(float(self.X[p1][item]) - float(self.X[p2][item]),2) for item in self.X[p1] if item in self.X[p2]])
 
-		return 1/(1+sum_of_squares)
+		return 1.0/(1.0+sum_of_squares)
+		# return sum_of_squares
 
 	def vec_sim_pearson(self,p1,p2):
 		# return vectorized pearson correlation coefficient
@@ -59,15 +61,37 @@ class Baseline(object):
 
 	def sim_pearson(self,p1,p2):
 		# get mutually rated items
-		
+		si = {}
+		for item in self.X[p1]:
+			if item in self.X[p2]:
+				si[item] = 1
 
-	def topMatches(self,person,n=5,similarity=sim_distance):
-		# calculate scores of all other reviewers
-		scores=[(similarity(self,person,other),other) for other in self.X if other != person]
-		# sort list in place
-		scores.sort()
-		scores.reverse()
-		return scores[0:n]
+		# number of elements in common
+		n = len(si)
+
+		# if no ratings in common, return 0
+		if n == 0: return 0
+
+		# Add up all the preferences
+		sum1=sum([self.X[p1][it] for it in si])
+		sum2=sum([self.X[p2][it] for it in si])
+
+		# Sum up the squares
+		sum1Sq=sum([pow(self.X[p1][it],2) for it in si])
+		sum2Sq=sum([pow(self.X[p2][it],2) for it in si])
+
+		# Sum up the products
+		pSum=sum([self.X[p1][it]*self.X[p2][it] for it in si])
+
+		# Calculate Pearson score
+		num=pSum-(sum1*sum2/n)
+		den=sqrt((sum1Sq-pow(sum1,2)/n)*(sum2Sq-pow(sum2,2)/n))
+
+		if den==0: return 0
+
+		r=num/den
+
+		return r
 
 	def vectorize(self,data,p1,p2):
 		# get list of shared ratings
@@ -84,9 +108,50 @@ class Baseline(object):
 		# return as np arrays
 		return np.array(x),np.array(y)
 
+	def topMatches(self,person,n=5,similarity=sim_pearson):
+		scores=[(similarity(self,person,other),other)
+		for other in self.X if other!=person]
+
+		# Sort the list so the highest scores appear at the top
+		scores.sort()
+		scores.reverse()
+		return scores[0:n]
+
+	def getRecommendations(self,person,similarity):
+		totals={}
+		simSums={}
+		for other in self.X:
+			# don't compare me to myself
+			if other==person:
+				continue
+			sim=similarity(person,other)
+
+			# ignore scores of zero or lower
+			if sim<=0:
+				continue
+
+			for item in self.X[other]:
+				# only score movies I haven't seen yet
+				if item not in self.X[person] or self.X[person][item]==0:
+					# Similarity * Score
+					totals.setdefault(item,0)
+					totals[item]+=self.X[other][item]*sim
+					# Sum of similarities
+					simSums.setdefault(item,0)
+					simSums[item]+=sim
+
+		# Create the normalized list
+		rankings=[(total/simSums[item],item) for item,total in totals.items()]
+
+		# Return the sorted list
+		rankings.sort()
+		rankings.reverse()
+		return rankings
+
 
 data = util.design_dict('ml-100k/u.data')
 
 m = Baseline()
 m.fit(data)
-print m.topMatches(4,n=1000)
+print m.getRecommendations(4,similarity=m.sim_pearson)
+
