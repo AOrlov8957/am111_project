@@ -37,7 +37,16 @@ def design_dict(f_name):
 def design_matrix(f_name):
 	data = design_dict(f_name)
 
-	full_data = [[float('NaN') for i in range(max_i)] for j in range(max_u)]
+	max_u = np.max(data.keys())
+	max_i = -float('inf')
+
+	# find max item id
+	for user in data.keys():
+		for item in data[user]:
+			if item >= max_i:
+				max_i = item
+
+	full_data = [[0 for i in range(max_i)] for j in range(max_u)]
 
 	# create design matrix
 	for k_u in data.keys():
