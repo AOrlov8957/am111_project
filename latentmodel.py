@@ -48,6 +48,9 @@ class Latentmodel(object):
 		self.mat_max = np.max(self.fit_mat)
 		self.mat_min = np.min(self.fit_mat)
 
+		print self.m
+		print self.n
+
 		pass
 
 		# perform stochastic gradient descent
@@ -110,8 +113,7 @@ class Latentmodel(object):
 data = util.design_matrix('ml-100k/u.data')
 l = Latentmodel()
 l.fit(data,1500)
-for item in range(300):
-	print l.predictedRating(4,item)
+
 # print l.predError()
 
 

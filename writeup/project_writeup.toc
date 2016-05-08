@@ -1,0 +1,9 @@
+\select@language {english}
+\contentsline {section}{Introduction}{1}{Doc-Start}
+\contentsline {paragraph}{Types of Collaborative Filtering}{1}{paragraph*.1}
+\contentsline {section}{\numberline {1}Models}{1}{section.1}
+\contentsline {paragraph}{A tale of two models...}{1}{paragraph*.2}
+\contentsline {paragraph}{Neighborhood Distance model}{2}{paragraph*.3}
+\contentsline {paragraph}{Latent Factor Collaborative Filtering}{2}{paragraph*.4}
+\contentsline {paragraph}{Where we ended up}{2}{paragraph*.5}
+\contentsfinish 
